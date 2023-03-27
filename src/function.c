@@ -40,23 +40,16 @@ void saveHand( int cardId, users *user ) {
     int mark = (cardId - 1) % 4;
     int number = (cardId + 3) / 4;
 
+    user->string[user->column] = suit[mark];
+    user->column++;
+    user->string[user->column] = rank[number];
+    user->column++;
     if (number == 10) {
-        user->string[user->column] = suit[mark];
-        user->column++;
-        user->string[user->column] = rank[number];
-        user->column++;
         user->string[user->column] = rank[0];
         user->column++;
-        user->string[user->column] = ' ';
-        user->column++;
-    } else {
-        user->string[user->column] = suit[mark];
-        user->column++;
-        user->string[user->column] = rank[number];
-        user->column++;
-        user->string[user->column] = ' ';
-        user->column++;
     }
+    user->string[user->column] = ' ';
+    user->column++;
     user->cardRank = number;
 }
 
