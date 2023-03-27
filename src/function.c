@@ -385,6 +385,5 @@ void calculateBet( game *blackjack, users *player , int *bet ) {
         }
         printf("%dG", *bet);
     }
-
     blackjack->gold += *bet;
 }
