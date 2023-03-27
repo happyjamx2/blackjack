@@ -96,14 +96,15 @@ void printScore( users *user ) {
 
     printf("\nカードの合計: ");
 
-    if (user->hand == HARD) {
-        printf("%d", user->score);
-    } else if (user->hand == SOFT) {
-        if (user->score <= 21) {
-            printf("%d/%d", (user->score - 10), user->score);
-        } else {
+    switch (user->hand) {
+        case HARD:
             printf("%d", user->score);
-        }
+            break;
+        case SOFT:
+            printf("%d/%d", (user->score - 10), user->score);    
+            break;
+        default:
+            break;
     }
 }
 

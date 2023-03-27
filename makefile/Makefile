@@ -1,4 +1,4 @@
-CMD	   = ../debug/blackjack.exe
+CMD	   = ../bin/blackjack.exe
 SRCDIR = ../src
 SRCS   = blackjack.c const.c function.c
 OBJDIR = ../obj
