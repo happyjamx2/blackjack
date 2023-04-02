@@ -9,6 +9,7 @@ void setValue( game *blackjack, users *player, users *dealer ) {
     for (int i = 0; i < CARD; i++) {
         blackjack->card[i] = 0;
     }
+    blackjack->command = INVALID;
 
     player->cardRank = 0;
     player->column = 0;
@@ -129,30 +130,30 @@ void convertInput( char *input, action *command ) {
     for (int i = 0; input[i] != '\0'; i++) {
         column++;
     }
-    if (column == 1) {
-        if (0) {
-        } else if (input[0] == 'h') {
-            *command = HIT;
-        } else if (input[0] == 's') {
-            *command = STAND;
-        } else {
+    switch (column) {
+        case 1:
+            if (0) {
+            } else if (input[0] == 'h') {
+                *command = HIT;
+            } else if (input[0] == 's') {
+                *command = STAND;
+            } else {
+                *command = INVALID;
+            }
+            break;
+        case 2:
+            if (0) {
+            } else if (input[0] == 's' && input[1] == 'u') {
+                *command = SURRENDER;
+            } else if (input[0] == 'd' && input[1] == 'd') {
+                *command = DOUBLEDOWN;
+            } else {
+                *command = INVALID;
+            }
+            break;
+        default:
             *command = INVALID;
-        }
-    }
-    
-    if (column == 2) {
-        if (0) {
-        } else if (input[0] == 's' && input[1] == 'u') {
-            *command = SURRENDER;
-        } else if (input[0] == 'd' && input[1] == 'd') {
-            *command = DOUBLEDOWN;
-        } else {
-            *command = INVALID;
-        }
-    }
-    
-    if (column == 3) {
-        *command = INVALID;
+            break;
     }
 }
 
@@ -183,10 +184,9 @@ void printStatus( users *user ) {
 //  各コマンドでの動き
 void playerCommand( game *blackjack, users *player ) {
 
-    action output;
     char input[SIZE];
 
-    switch (player->command) {
+    switch (blackjack->command) {
         case HIT:
             do {
                 printf("\nカードを追加します。");
@@ -201,18 +201,18 @@ void playerCommand( game *blackjack, users *player ) {
                 }
                 printf("\n\n行動を選択してください。(H/S) ");
                 while (1) {
-                    scanf("%2s%*[^\n]", input);
+                    scanf("%3s%*[^\n]", input);
                     getchar();
-                    convertInput(input, &output);
-                    if (output == STAND) {
+                    convertInput(input, &blackjack->command);
+                    if (blackjack->command == STAND) {
                         player->end = LE21;
                         break;
-                    } else if (output == HIT) {
+                    } else if (blackjack->command == HIT) {
                         break;
                     }
                     printf("有効な値ではありません。");
                 }
-            } while (output == HIT);
+            } while (blackjack->command == HIT);
             break;
         case STAND:
         case SURRENDER:
@@ -224,11 +224,11 @@ void playerCommand( game *blackjack, users *player ) {
             drawCard(blackjack, player);
             if (player->score > 21) {
                 player->end = BURST;
-            } else if (player->score == 21) {
-                player->end = LE21;
             } else {
                 player->end = LE21;
-                printf("\n");
+                if (player->score < 21) {
+                    printf("\n");
+                }
             }
             break;        
         default:
@@ -239,7 +239,6 @@ void playerCommand( game *blackjack, users *player ) {
 //  プレーヤーのターン
 void playerTurn( game *blackjack, users *player ) {
 
-    action output;
     char input[SIZE];
 
     printf("\n\n---プレーヤーのターン---");
@@ -249,21 +248,20 @@ void playerTurn( game *blackjack, users *player ) {
     if (player->score < 21) {
         printf("\n\n行動を選択してください。(H/S/SU/DD) ");
         while (1) {
-            scanf("%2s%*[^\n]", input);
+            scanf("%3s%*[^\n]", input);
             getchar();
-            convertInput(input, &output);
-            if (output == INVALID) {
+            convertInput(input, &blackjack->command);
+            if (blackjack->command == INVALID) {
                 printf("有効な値ではありません。");
             } else {
                 break;
             }
         }
-        player->command = output;
         playerCommand(blackjack, player);
     } else if (player->score == 21) {
         player->end = BJ;
     }
-    if (output == SURRENDER) {
+    if (blackjack->command == SURRENDER) {
     } else {
         printStatus(player);
     }
@@ -274,7 +272,7 @@ void dealerTurn( game *blackjack, users *player, users *dealer ) {
 
     int count = 0;
 
-    if (player->command == SURRENDER) {
+    if (blackjack->command == SURRENDER) {
     } else {
 
         printf("\n---ディーラーのターン---");
@@ -313,7 +311,7 @@ void dealerTurn( game *blackjack, users *player, users *dealer ) {
 //  勝敗を判定する
 void judgeResult( game *blackjack, users *player, users *dealer ) {
 
-    if (player->command == SURRENDER) {
+    if (blackjack->command == SURRENDER) {
 
         printf("\n降参しました。");
         blackjack->result = LOSE;
@@ -369,7 +367,7 @@ void judgeResult( game *blackjack, users *player, users *dealer ) {
 //  掛け金を計算する
 void calculateBet( game *blackjack, users *player , int *bet ) {
 
-    if (player->command == DOUBLEDOWN) {
+    if (blackjack->command == DOUBLEDOWN) {
         *bet *= 2;
     }
     if (blackjack->result == WIN) {
@@ -381,7 +379,7 @@ void calculateBet( game *blackjack, users *player , int *bet ) {
         *bet = 0;
         printf("±%dG", *bet);
     } else if (blackjack->result == LOSE) {
-        if (player->command == SURRENDER) {
+        if (blackjack->command == SURRENDER) {
             *bet = *bet / 2 * (-1);
         } else {
             *bet = *bet * (-1);

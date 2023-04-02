@@ -27,6 +27,7 @@ typedef enum Action {
 typedef struct Game {
     int card[CARD];
     int gold;
+    action command;
     fight result;
 } game;
 
@@ -37,7 +38,6 @@ typedef struct Users {
     int score;             //  スコアを格納する変数
     type hand;
     status end;
-    action command;
 } users;
 
 void setValue(game *blackjack, users *player, users *dealer);
