@@ -215,10 +215,7 @@ void playerCommand( game *blackjack, users *player ) {
             } while (output == HIT);
             break;
         case STAND:
-            player->end = LE21;
-            break;
         case SURRENDER:
-            blackjack->result = LOSE;
             player->end = LE21;
             break;        
         case DOUBLEDOWN:
@@ -317,48 +314,55 @@ void dealerTurn( game *blackjack, users *player, users *dealer ) {
 void judgeResult( game *blackjack, users *player, users *dealer ) {
 
     if (player->command == SURRENDER) {
+
         printf("\n降参しました。");
+        blackjack->result = LOSE;
+
     } else {
 
         printf("\n勝敗を判定します。");
         switch (player->end) {
             case BURST:
                 blackjack->result = LOSE;
-                printf("\nプレーヤーの負けです。"); 
                 break;
             case LE21:
-                if (0) {
-                } else if (dealer->end == BURST) {
+                if (dealer->end == BURST) {
                     blackjack->result = WIN;
-                    printf("\nプレーヤーの勝ちです。");
                 } else if (dealer->end == LE21) {
                     if (player->score < dealer->score) {
                         blackjack->result = LOSE;
-                        printf("\nプレーヤーの負けです。");
                     } else if (player->score == dealer->score) {
                         blackjack->result = DRAW;
-                        printf("\n引き分けです。");
                     } else if (player->score > dealer->score) {
                         blackjack->result = WIN;
-                        printf("\nプレーヤーの勝ちです。");
                     }
                 } else if (dealer->end == BJ) {
                     blackjack->result = LOSE;
-                    printf("\nプレーヤーの負けです。");
                 }
                 break;
             case BJ:
                 if (dealer->end == BJ) {
                     blackjack->result = DRAW;
-                    printf("\n引き分けです。");
                 } else {
                     blackjack->result = WIN;
-                    printf("\nプレーヤーの勝ちです。");
                 }
                 break;
             default:
                 break;
         }
+    }
+    switch (blackjack->result) {
+        case WIN:
+            printf("\nプレーヤーの勝ちです。");
+            break;
+        case DRAW:
+            printf("\n引き分けです。");
+            break;
+        case LOSE:
+            printf("\nプレーヤーの負けです。");
+            break;
+        default:
+            break;
     }
 }
 
@@ -368,7 +372,6 @@ void calculateBet( game *blackjack, users *player , int *bet ) {
     if (player->command == DOUBLEDOWN) {
         *bet *= 2;
     }
-
     if (blackjack->result == WIN) {
         if (player->end == BJ) {
             *bet = *bet * 3 / 2;
